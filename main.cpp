@@ -2,6 +2,7 @@
 #include <stdarg.h>
 #include <string>
 #include <math.h>
+#include <time.h>
 
 using namespace std;
 
@@ -40,7 +41,7 @@ class VecBase {
     }
 };
 
-static const int var = 2;
+static const int var = 1;
 typedef VecBase<var> Vec;
 
 float nextFloat() {
@@ -48,28 +49,73 @@ float nextFloat() {
 }
 
 float f(Vec v) {
-  return v[0]*v[0] + v[1]*v[1];
+  return v[0]*v[0];
 }
 
 static float alpha = 1.618;
 static float beta = 0.618;
 static float M = 20;
-static float t = 1;
 static float R = 0.01;
 static float N = 20;
 static float k = 0;
 static float j = 1;
 
-int main() {
-  
+#define itv for (int i = 0; i < var; i++)
+
+Vec find1(float m = R) {
+  float t = 1;
   Vec x;
-  for (int i = 0; i < var; i++) x[i] = rand()*21 - 10;
+  float v;
   
+  itv x[i] = nextFloat()*20 - 10;
+  
+  int itr = 0;
+  while(++itr) {
+    
+    
+    Vec d;
+    itv d[i] = nextFloat()*2-1;
+    
+    Vec y;
+    itv y[i] = x[i] + t*d[i];
+    
+    cout << itr << "\n  d="; d.log(); 
+    cout << "  y="; y.log();
+    cout << "  f(y) > f(x)  " << (f(y) > f(x)) << "\n";
+    cout << "  t=" << t << "\n\n";
+    
+    if (f(y) > f(x)) {
+      t *= beta;
+      
+      if (t <= m) {
+        v = f(x);
+        return x;
+      }
+      
+      continue;
+    } else {
+      t *= alpha;
+      x = y;
+    }
+    
+  }
+  
+  return x;  
+}
+
+Vec find2() {
+  float t = 1;
+  float alpha = 2;
+  float beta = 0.5;
+  Vec x;
+  
+  for (int i = 0; i < var; i++) x[i] = nextFloat()*21 - 10;
   while (true) {
     
     bool ok = false;
-    
     while (true) {
+      
+      
       Vec ksi;
       for (int i = 0; i < var; i++) ksi[i] = nextFloat()*2 - 1;
       float ksiLength = ksi.length();
@@ -106,9 +152,23 @@ int main() {
     
   } 
   
+  return x;
+}
+
+int main() {
+  
+  srand(time(0));
+  
+  clock_t t0 = clock();
+  Vec x1 = find1(0.01);
+  clock_t t1 = clock();
+  Vec x2 = find2();
+  clock_t t2 = clock();
+  
   cout << "\n\n\n\n\n";
-  cout << "x = "; x.log();
-  cout << "f(x) = " << f(x) << "\n\n\n";
+  cout << "x1(" << float(t1-t0)/CLOCKS_PER_SEC << ") = "; x1.log();
+  cout << "x2(" << float(t2-t1)/CLOCKS_PER_SEC << ") = "; x2.log();
+  cout << "f(x1) = " << f(x1) << "\nf(x2) = " << f(x2);
   
   return 0;
 }
